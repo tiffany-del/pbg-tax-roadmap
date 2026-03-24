@@ -11,13 +11,16 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Install Node dependencies
+# Install Node dependencies (all deps needed for build)
 COPY package*.json ./
-RUN npm ci --omit=dev 2>/dev/null || npm ci
+RUN npm ci
 
 # Copy source and build
 COPY . .
 RUN npm run build
+
+# Prune dev dependencies after build
+RUN npm prune --omit=dev
 
 # Install Python dependencies
 RUN pip3 install --no-cache-dir --break-system-packages \
