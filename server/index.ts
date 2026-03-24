@@ -12,21 +12,12 @@ declare module "http" {
   }
 }
 
-// CORS — allow Netlify frontend to call this API
+// CORS — allow any origin (dashboard is password-protected)
 app.use((req, res, next) => {
-  const allowed = [
-    "https://luminous-sopapillas-61551c.netlify.app",
-    "https://pbg-dashboard.netlify.app",
-    "https://dashboard.phillipsbusinessgroup.com",
-    "https://phillipsbusinessgroup.com",
-    "https://www.phillipsbusinessgroup.com",
-  ];
-  const origin = req.headers.origin || "";
-  if (allowed.includes(origin) || !origin) {
-    res.setHeader("Access-Control-Allow-Origin", origin || "*");
-  }
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
