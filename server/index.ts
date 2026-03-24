@@ -14,12 +14,22 @@ declare module "http" {
 }
 
 // CORS — allow all origins (dashboard is password-protected)
+// Railway's edge proxy strips ACAO on OPTIONS — force it via direct header setting
 app.use(cors({
-  origin: true,
+  origin: (origin, cb) => cb(null, origin || "*"),
   credentials: true,
   methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization"],
+  optionsSuccessStatus: 200, // some Railway edge versions require 200 not 204
+  preflightContinue: false,
 }));
+// Belt-and-suspenders: force ACAO header on every response
+app.use((req, res, next) => {
+  if (!res.getHeader("Access-Control-Allow-Origin")) {
+    res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  }
+  next();
+});
 
 app.use(
   express.json({
