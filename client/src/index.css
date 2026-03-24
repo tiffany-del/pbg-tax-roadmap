@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* PBG Brand: navy, blush, off-white, slate */
+    --background: 60 18% 96%;       /* off-white #f5f5f0 */
+    --foreground: 224 51% 21%;      /* navy #1b2951 */
+    --card: 0 0% 100%;
+    --card-foreground: 224 51% 21%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 51% 21%;
+    --primary: 224 51% 21%;         /* navy */
+    --primary-foreground: 60 18% 96%;
+    --secondary: 0 64% 89%;         /* blush #f7cac9 */
+    --secondary-foreground: 224 51% 21%;
+    --muted: 200 14% 46%;           /* slate #5d737e */
+    --muted-foreground: 200 14% 40%;
+    --accent: 0 64% 89%;
+    --accent-foreground: 224 51% 21%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 10% 80%;
+    --input: 210 10% 80%;
+    --ring: 224 51% 21%;
+    --radius: 0.5rem;
+    /* sidebar */
+    --sidebar-background: 224 51% 21%;
+    --sidebar-foreground: 60 18% 96%;
+    --sidebar-primary: 0 64% 89%;
+    --sidebar-primary-foreground: 224 51% 21%;
+    --sidebar-accent: 224 40% 28%;
+    --sidebar-accent-foreground: 60 18% 96%;
+    --sidebar-border: 224 40% 28%;
+    --sidebar-ring: 0 64% 89%;
+  }
+
+  .dark {
+    --background: 224 51% 12%;
+    --foreground: 60 18% 96%;
+    --card: 224 45% 16%;
+    --card-foreground: 60 18% 96%;
+    --popover: 224 45% 16%;
+    --popover-foreground: 60 18% 96%;
+    --primary: 0 64% 89%;
+    --primary-foreground: 224 51% 21%;
+    --secondary: 224 40% 22%;
+    --secondary-foreground: 60 18% 96%;
+    --muted: 224 30% 25%;
+    --muted-foreground: 210 14% 65%;
+    --accent: 224 40% 22%;
+    --accent-foreground: 60 18% 96%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 224 35% 25%;
+    --input: 224 35% 25%;
+    --ring: 0 64% 89%;
+    --sidebar-background: 224 51% 10%;
+    --sidebar-foreground: 60 18% 96%;
+    --sidebar-primary: 0 64% 89%;
+    --sidebar-primary-foreground: 224 51% 21%;
+    --sidebar-accent: 224 40% 18%;
+    --sidebar-accent-foreground: 60 18% 96%;
+    --sidebar-border: 224 35% 18%;
+    --sidebar-ring: 0 64% 89%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+  }
+}
+
+/* Roadmap-style strategy card */
+.strategy-card {
+  @apply border rounded-lg p-4 mb-3;
+}
+.strategy-card.suggested {
+  @apply border-l-4 border-l-green-600 bg-green-50;
+}
+.strategy-card.excluded {
+  @apply border-l-4 border-l-gray-300 bg-gray-50;
+}
+.strategy-card.manual-add {
+  @apply border-l-4 border-l-blue-500 bg-blue-50;
+}
+
+/* Savings badge */
+.savings-badge {
+  @apply text-sm font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded;
+}
+
+/* Step wizard */
+.step-indicator {
+  @apply flex items-center gap-2 text-sm;
+}
+.step-indicator.active {
+  @apply font-semibold text-primary;
+}
+.step-indicator.done {
+  @apply text-muted-foreground line-through;
+}
