@@ -7,8 +7,16 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 function getApiBase(): string {
   if (typeof window === "undefined") return "";
   const path = window.location.pathname;
+  // On Perplexity platform proxy: use the proxy path
   const match = path.match(/(\/computer\/a\/[^/]+)/);
   if (match) return `${match[1]}/port/5000`;
+  // On Netlify (dashboard.phillipsbusinessgroup.com or pbg-dashboard.netlify.app)
+  // call the Railway backend directly
+  const host = window.location.hostname;
+  if (host.includes("netlify.app") || host.includes("phillipsbusinessgroup.com")) {
+    return "https://pbg-tax-roadmap-production.up.railway.app";
+  }
+  // Local development
   return "";
 }
 export const API_BASE = getApiBase();

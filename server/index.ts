@@ -16,9 +16,10 @@ declare module "http" {
 app.use((req, res, next) => {
   const allowed = [
     "https://luminous-sopapillas-61551c.netlify.app",
+    "https://pbg-dashboard.netlify.app",
+    "https://dashboard.phillipsbusinessgroup.com",
     "https://phillipsbusinessgroup.com",
     "https://www.phillipsbusinessgroup.com",
-    "https://arrival-happening-annex-subscriptions.trycloudflare.com",
   ];
   const origin = req.headers.origin || "";
   if (allowed.includes(origin) || !origin) {

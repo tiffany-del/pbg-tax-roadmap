@@ -403,31 +403,11 @@ export default function Dashboard() {
         {/* ── CLIENTS TAB ── */}
         {tab === "clients" && (
           <div className="space-y-3">
-            {/* Show notice when running on Netlify (no Perplexity proxy in path) */}
-            {typeof window !== "undefined" && !window.location.pathname.includes("/computer/a/") && (
-              <div className="bg-[#1b2951]/5 border border-[#1b2951]/20 rounded-xl p-5 flex items-start gap-4">
-                <div className="w-10 h-10 bg-[#1b2951] rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <ExternalLink className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-[#1b2951] mb-1">Client Roadmaps are managed inside Perplexity</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    Creating client roadmaps and generating PDFs requires the backend, which runs inside
-                    the Perplexity conversation where this tool was built. To access it:
-                  </p>
-                  <ol className="text-sm text-gray-600 mt-2 ml-4 space-y-1 list-decimal">
-                    <li>Go to <strong>perplexity.ai</strong> and log in</li>
-                    <li>Open the <strong>Tax Savings Roadmap</strong> conversation</li>
-                    <li>Click the <strong>PBG Tax Roadmap Tool</strong> card in the chat</li>
-                    <li>Log in with your team password</li>
-                  </ol>
-                </div>
-              </div>
-            )}
+
             {clientsLoading && (
               <div className="text-center py-12 text-gray-400">Loading clients...</div>
             )}
-            {!clientsLoading && clients.length === 0 && !(!window.location.pathname.includes("/computer/a/")) && (
+            {!clientsLoading && clients.length === 0 && (
               <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
                 <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                 <h3 className="font-semibold text-gray-700 mb-1">No client roadmaps yet</h3>
@@ -439,9 +419,6 @@ export default function Dashboard() {
                   <Plus className="w-4 h-4 mr-1" /> New Client Roadmap
                 </Button>
               </div>
-            )}
-            {!clientsLoading && clients.length === 0 && !window.location.pathname.includes("/computer/a/") && (
-              <div className="text-center py-8 text-gray-400 text-sm">No client roadmaps available here.</div>
             )}
             {clients.map(client => (
               <div
