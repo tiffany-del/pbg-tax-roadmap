@@ -11,15 +11,26 @@ function getApiBase(): string {
   const match = path.match(/(\/computer\/a\/[^/]+)/);
   if (match) return `${match[1]}/port/5000`;
   // On Netlify (dashboard.phillipsbusinessgroup.com or pbg-dashboard.netlify.app)
-  // call the Railway backend directly
+  // use the Netlify function proxy (avoids Railway CORS issues)
   const host = window.location.hostname;
   if (host.includes("netlify.app") || host.includes("phillipsbusinessgroup.com")) {
-    return "https://pbg-tax-roadmap-production.up.railway.app";
+    return "/.netlify/functions/api";
   }
   // Local development
   return "";
 }
 export const API_BASE = getApiBase();
+
+// For file uploads, bypass the Netlify proxy (6MB limit) and go direct to Railway.
+// Railway CORS allows * on non-OPTIONS requests, so this works for POST with FormData.
+export function getUploadBase(): string {
+  if (typeof window === "undefined") return "";
+  const host = window.location.hostname;
+  if (host.includes("netlify.app") || host.includes("phillipsbusinessgroup.com")) {
+    return "https://pbg-tax-roadmap-production.up.railway.app";
+  }
+  return getApiBase();
+}
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
