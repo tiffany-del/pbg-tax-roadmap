@@ -21,15 +21,16 @@ function getApiBase(): string {
 }
 export const API_BASE = getApiBase();
 
-// For file uploads, bypass the Netlify proxy (6MB limit) and go direct to Railway.
-// Railway CORS allows * on non-OPTIONS requests, so this works for POST with FormData.
+// For file uploads, use a relative URL on Netlify so the upload goes through
+// the dedicated Netlify upload function (handles CORS properly).
 export function getUploadBase(): string {
   if (typeof window === "undefined") return "";
-  const host = window.location.hostname;
-  if (host.includes("netlify.app") || host.includes("phillipsbusinessgroup.com")) {
-    return "https://pbg-tax-roadmap-production.up.railway.app";
-  }
-  return getApiBase();
+  const path = window.location.pathname;
+  // On Perplexity platform proxy
+  const match = path.match(/(\/computer\/a\/[^/]+)/);
+  if (match) return `${match[1]}/port/5000`;
+  // On Netlify: use relative URL (routes through netlify.toml redirect to upload function)
+  return "";
 }
 
 async function throwIfResNotOk(res: Response) {

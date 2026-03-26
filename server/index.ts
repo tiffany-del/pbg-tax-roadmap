@@ -1,5 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import cors from "cors";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -13,20 +12,16 @@ declare module "http" {
   }
 }
 
-// CORS — allow all origins (dashboard is password-protected)
-// Railway's edge proxy strips ACAO on OPTIONS — force it via direct header setting
-app.use(cors({
-  origin: (origin, cb) => cb(null, origin || "*"),
-  credentials: true,
-  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"],
-  optionsSuccessStatus: 200, // some Railway edge versions require 200 not 204
-  preflightContinue: false,
-}));
-// Belt-and-suspenders: force ACAO header on every response
+// CORS — manual middleware (Railway edge proxy strips cors() package headers on OPTIONS)
+// Set headers on every response including OPTIONS preflight
 app.use((req, res, next) => {
-  if (!res.getHeader("Access-Control-Allow-Origin")) {
-    res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  const origin = req.headers.origin || "*";
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
   }
   next();
 });
