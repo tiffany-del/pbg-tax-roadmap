@@ -24,6 +24,14 @@ const upload = multer({
 
 const execAsync = promisify(exec);
 
+// execPython: run python3 reliably on both local and Railway (node:20-slim)
+// Uses shell:true to ensure /bin/sh is found regardless of PATH configuration
+async function execPython(scriptPath: string, args: string[]): Promise<void> {
+  const quotedArgs = args.map(a => `"${a.replace(/"/g, '\\"')}"`).join(' ');
+  const cmd = `python3 "${scriptPath}" ${quotedArgs}`;
+  await execAsync(cmd, { shell: true, timeout: 120000 });
+}
+
 // In-memory PDF cache: quizId → { buffer, generatedAt }
 const quizPdfCache = new Map<number, { buffer: Buffer; generatedAt: Date }>();
 
@@ -32,7 +40,7 @@ async function generateQuizPdf(quiz: any, scriptPath: string): Promise<Buffer | 
   const outPath     = `/tmp/pbg_quiz_report_${quiz.id}.pdf`;
   try {
     fs.writeFileSync(payloadPath, JSON.stringify({ mode: "quiz", quiz }, null, 2));
-    await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: process.cwd() });
+    await execPython(scriptPath, [payloadPath, outPath]);
     const buf = fs.readFileSync(outPath);
     try { fs.unlinkSync(payloadPath); } catch {}
     try { fs.unlinkSync(outPath); } catch {}
@@ -514,7 +522,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const scriptPath = path.join(process.cwd(), "generate_pdf.py");
 
     try {
-      await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: process.cwd() });
+      await execPython(scriptPath, [payloadPath, outPath]);
       const pdfBuffer = fs.readFileSync(outPath);
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="Tax-Roadmap-${client.name.replace(/\s+/g, '-')}.pdf"`);
@@ -545,7 +553,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const scriptPath = path.join(process.cwd(), "generate_premium_pdf.py");
 
     try {
-      await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: process.cwd() });
+      await execPython(scriptPath, [payloadPath, outPath]);
       const pdfBuffer = fs.readFileSync(outPath);
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="Premium-Analysis-${client.name.replace(/\s+/g, '-')}.pdf"`);
@@ -592,10 +600,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const uploadedPath = req.file.path;
     (async () => {
       try {
-        await execAsync(
-          `python3 "${scriptPath}" "${uploadedPath}" "${fileType}" "${outJsonPath}"`,
-          { cwd: process.cwd(), timeout: 120000 }
-        );
+        await execPython(scriptPath, [uploadedPath, fileType, outJsonPath]);
         const raw = fs.readFileSync(outJsonPath, "utf-8");
         const extracted = JSON.parse(raw);
         if (extracted.error) {
