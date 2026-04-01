@@ -34,7 +34,7 @@ RUN pip3 install --no-cache-dir --break-system-packages \
     requests
 
 # Copy Python scripts to dist
-RUN cp generate_pdf.py dist/ && cp extract_document.py dist/
+RUN cp generate_pdf.py dist/ && cp extract_document.py dist/ && cp generate_premium_pdf.py dist/
 
 # Copy logo
 RUN cp pbg_logo_horizontal.png dist/public/ 2>/dev/null || true
