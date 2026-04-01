@@ -525,6 +525,37 @@ export function registerRoutes(httpServer: Server, app: Express) {
     }
   });
 
+  // POST /api/clients/:id/generate-premium-pdf — generate premium multi-year analysis PDF
+  app.post("/api/clients/:id/generate-premium-pdf", async (req, res) => {
+    const clientId = Number(req.params.id);
+    const client = await storage.getClient(clientId);
+    if (!client) return res.status(404).json({ message: "Client not found" });
+
+    const entities = await storage.getEntitiesByClient(clientId);
+    const allSelections: Record<number, any[]> = {};
+    for (const entity of entities) {
+      allSelections[entity.id] = await storage.getSelectionsForEntity(entity.id);
+    }
+
+    const payload = { client, entities, allSelections };
+    const payloadPath = `/tmp/pbg_payload_premium_${clientId}.json`;
+    fs.writeFileSync(payloadPath, JSON.stringify(payload, null, 2));
+
+    const outPath = `/tmp/pbg_premium_${clientId}.pdf`;
+    const scriptPath = path.join(process.cwd(), "generate_premium_pdf.py");
+
+    try {
+      await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: '/home/user/workspace/pbg-roadmap-app/dist' });
+      const pdfBuffer = fs.readFileSync(outPath);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="Premium-Analysis-${client.name.replace(/\s+/g, '-')}.pdf"`);
+      res.send(pdfBuffer);
+    } catch (e: any) {
+      console.error("Premium PDF generation error:", e.stderr || e.message);
+      res.status(500).json({ message: "Premium PDF generation failed", detail: e.stderr || e.message });
+    }
+  });
+
   // ─── Document Upload & Extraction ───────────────────────────────
 
   // GET /api/entities/:id/files — list uploaded files for entity

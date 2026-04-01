@@ -642,6 +642,7 @@ export default function ClientWorkflow() {
   const [activeEntityId, setActiveEntityId] = useState<number | null>(null);
   const [newEntityForm, setNewEntityForm] = useState({ name: "", entityType: "1040" });
   const [generating, setGenerating] = useState(false);
+  const [generatingPremium, setGeneratingPremium] = useState(false);
 
   const clientId = Number(params.id);
 
@@ -707,6 +708,29 @@ export default function ClientWorkflow() {
     }
   };
 
+  const generatePremiumPdf = async () => {
+    setGeneratingPremium(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/clients/${clientId}/generate-premium-pdf`, { method: "POST" });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || err.message || "Premium PDF generation failed");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Premium-Analysis-${client?.name?.replace(/\s+/g, "-") || "Client"}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Premium report downloaded" });
+    } catch (e: any) {
+      toast({ title: "Premium PDF failed", description: e.message, variant: "destructive" });
+    } finally {
+      setGeneratingPremium(false);
+    }
+  };
+
   if (!client) return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
 
   const activeEntity = entities.find(e => e.id === activeEntityId) ?? entities[0] ?? null;
@@ -724,10 +748,21 @@ export default function ClientWorkflow() {
             <p className="text-xs opacity-70">Tax Year {client.taxYear} · {client.filingStatus} · {client.inputMode === "financials" ? "Financials Only" : "Tax Return"}</p>
           </div>
           {step === 4 && (
-            <Button variant="secondary" onClick={generatePdf} disabled={generating} data-testid="button-generate-pdf">
-              <FileDown className="w-4 h-4 mr-1" />
-              {generating ? "Generating PDF..." : "Download Roadmap PDF"}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={generatePdf} disabled={generating} data-testid="button-generate-pdf">
+                <FileDown className="w-4 h-4 mr-1" />
+                {generating ? "Generating..." : "Standard Roadmap"}
+              </Button>
+              <Button
+                onClick={generatePremiumPdf}
+                disabled={generatingPremium}
+                data-testid="button-generate-premium-pdf"
+                style={{ backgroundColor: "#b5cc42", color: "#1b2951", fontWeight: 600 }}
+              >
+                <FileDown className="w-4 h-4 mr-1" />
+                {generatingPremium ? "Generating..." : "Premium Report"}
+              </Button>
+            </div>
           )}
         </div>
       </div>
@@ -955,21 +990,50 @@ export default function ClientWorkflow() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center space-y-4">
-                  <FileDown className="w-10 h-10 mx-auto text-primary" />
-                  <h3 className="text-lg font-semibold">Generate Tax Savings Roadmap PDF</h3>
-                  <p className="text-muted-foreground text-sm">
-                    The PDF will be formatted exactly like your existing roadmaps — clean cover page, entity summary table, suggested strategies with savings ranges, excluded strategies, and next steps.
-                  </p>
-                  <Button size="lg" onClick={generatePdf} disabled={generating} data-testid="button-generate-pdf-review">
-                    <FileDown className="w-4 h-4 mr-2" />
-                    {generating ? "Generating PDF..." : "Download Tax Roadmap PDF"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <FileDown className="w-10 h-10 mx-auto text-primary" />
+                    <h3 className="text-lg font-semibold">Standard Roadmap</h3>
+                    <p className="text-muted-foreground text-sm">
+                      Clean cover page, entity summary, suggested strategies with savings ranges, excluded strategies, and next steps.
+                    </p>
+                    <Button size="lg" onClick={generatePdf} disabled={generating} data-testid="button-generate-pdf-review">
+                      <FileDown className="w-4 h-4 mr-2" />
+                      {generating ? "Generating..." : "Download Roadmap PDF"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card style={{ border: "2px solid #b5cc42" }}>
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <div className="w-10 h-10 mx-auto rounded-full flex items-center justify-center" style={{ backgroundColor: "#b5cc42" }}>
+                      <FileDown className="w-5 h-5" style={{ color: "#1b2951" }} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ backgroundColor: "#b5cc42", color: "#1b2951" }}>Premium</span>
+                      <h3 className="text-lg font-semibold mt-2">Multi-Year Analysis Report</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      5-year projections per strategy, cumulative savings chart, and a quarterly action plan for maximum implementation and audit protection.
+                    </p>
+                    <Button
+                      size="lg"
+                      onClick={generatePremiumPdf}
+                      disabled={generatingPremium}
+                      data-testid="button-generate-premium-pdf-review"
+                      style={{ backgroundColor: "#b5cc42", color: "#1b2951", fontWeight: 600 }}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      {generatingPremium ? "Generating..." : "Download Premium Report"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             <div className="flex justify-start mt-2">
               <Button variant="outline" onClick={() => setStep(3)}>← Back to Strategies</Button>
