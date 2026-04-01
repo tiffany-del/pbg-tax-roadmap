@@ -8,3 +8,4 @@ healthcheckPath = "/api/ghl/setup"
 healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
+# Railway force rebuild Wed Apr  1 21:34:46 UTC 2026
