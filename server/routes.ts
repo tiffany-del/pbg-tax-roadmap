@@ -32,7 +32,7 @@ async function generateQuizPdf(quiz: any, scriptPath: string): Promise<Buffer | 
   const outPath     = `/tmp/pbg_quiz_report_${quiz.id}.pdf`;
   try {
     fs.writeFileSync(payloadPath, JSON.stringify({ mode: "quiz", quiz }, null, 2));
-    await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: '/home/user/workspace/pbg-roadmap-app/dist' });
+    await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: process.cwd() });
     const buf = fs.readFileSync(outPath);
     try { fs.unlinkSync(payloadPath); } catch {}
     try { fs.unlinkSync(outPath); } catch {}
@@ -514,7 +514,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const scriptPath = path.join(process.cwd(), "generate_pdf.py");
 
     try {
-      await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: '/home/user/workspace/pbg-roadmap-app/dist' });
+      await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: process.cwd() });
       const pdfBuffer = fs.readFileSync(outPath);
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="Tax-Roadmap-${client.name.replace(/\s+/g, '-')}.pdf"`);
@@ -545,7 +545,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const scriptPath = path.join(process.cwd(), "generate_premium_pdf.py");
 
     try {
-      await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: '/home/user/workspace/pbg-roadmap-app/dist' });
+      await execAsync(`python3 ${scriptPath} ${payloadPath} ${outPath}`, { cwd: process.cwd() });
       const pdfBuffer = fs.readFileSync(outPath);
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename="Premium-Analysis-${client.name.replace(/\s+/g, '-')}.pdf"`);
